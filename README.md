@@ -1,7 +1,6 @@
 # parallel-virfinder
 
-[![Python Package using Conda](https://github.com/quadram-institute-bioscience/parallel-virfinder/actions/workflows/test.yml/badge.svg)](https://github.com/quadram-institute-bioscience/parallel-virfinder/actions/workflows/test.yml)
-
+[![Test-Package](https://github.com/quadram-institute-bioscience/parallel-virfinder/actions/workflows/test.yml/badge.svg)](https://github.com/quadram-institute-bioscience/parallel-virfinder/actions/workflows/test.yml)
 Run virfinder in parallel
 
 ## Usage

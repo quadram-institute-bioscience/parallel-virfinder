@@ -158,12 +158,17 @@ if __name__ == "__main__":
                     print('"{}","{}",{},{},{}'.format(passed, i[1], i[2], i[3], i[4]), file=f)
         
     logging.info("Saved CSV file to: %s", args.output)
-    print(sequences)
+
     if args.fasta is not None:
+        check = 0
         logging.info("Saving FASTA file to: %s" % args.fasta)
         with open(args.fasta, "w") as fa:
             for id, seq in read_fasta(args.input):
-                print(id)
                 if id in sequences:
+                    check += 1
                     print(">", id, "\n", seq, sep="", file=fa)
+        
+        if check != passed:
+            logging.error("Failed to save all sequences, printed %d while %d passed" % ( check, passed) )
+            
     logging.info("Passed %d out of %d sequences" % ( passed, parsed))

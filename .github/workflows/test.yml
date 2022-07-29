@@ -16,6 +16,8 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2.1.1
       with:
         channels: bioconda, conda-forge
-    - run: conda install "seqfu>1.13.0" "r-virfinder" && bash test/test.sh
+        use-mamba: true
+        environment-file: env.yaml
+    - run: bash test/test.sh
         
       

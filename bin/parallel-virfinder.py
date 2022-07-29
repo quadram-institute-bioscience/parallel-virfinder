@@ -98,7 +98,7 @@ if __name__ == "__main__":
         DELETE=False
         logLevel = logging.DEBUG
     if args.verbose:
-        DELETE=False
+        DELETE=True
         logLevel = logging.INFO
     else:
         DELETE=True
@@ -157,6 +157,11 @@ if __name__ == "__main__":
                     sequences.append(i[1])
                     print('"{}","{}",{},{},{}'.format(passed, i[1], i[2], i[3], i[4]), file=f)
         
+            if DELETE:
+                logging.info("Deleting temporary file: %s", outfile)
+                os.remove(outfile)
+
+        
     logging.info("Saved CSV file to: %s", args.output)
 
     if args.fasta is not None:
@@ -172,3 +177,4 @@ if __name__ == "__main__":
             logging.error("Failed to save all sequences, printed %d while %d passed" % ( check, passed) )
             
     logging.info("Passed %d out of %d sequences" % ( passed, parsed))
+

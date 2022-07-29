@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from ensurepip import version
 import os
 import sys
 import argparse
@@ -8,6 +9,7 @@ import subprocess
 import logging
 import tempfile
 
+__VERSION__="0.1.0"
 # parse csv
 import csv
 def parse_csv(filename):
@@ -105,6 +107,8 @@ if __name__ == "__main__":
         logLevel = logging.WARN
 
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logLevel)
+
+    logging.info("Starting parallel-virfinder v{}".format(__VERSION__))
     
     if not has_r():
         logging.error("R is not installed")

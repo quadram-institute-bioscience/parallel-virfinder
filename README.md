@@ -54,6 +54,6 @@ If you use parallel-virfinder, please cite the following paper:
 
 ### License
 
-[VirFinder](https://github.com/jessieren/VirFinder) is free to use for academic use only,
-see [license](https://github.com/jessieren/VirFinder/blob/master/licence.md).
+[VirFinder](https://github.com/jessieren/VirFinder) (see [license](https://github.com/jessieren/VirFinder/blob/master/licence.md))
+is free to use for academic or non commercial use only.
 [SeqFu](https://telatin.github.io/seqfu2/) and this wrapper are free to use.

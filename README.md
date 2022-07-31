@@ -5,6 +5,14 @@
 
 Run virfinder in parallel, saving both scores and FASTA file
 
+## Installation
+
+Via conda:
+
+```bash
+conda install -c bioconda -c conda-forge parallel-virfinder
+```
+
 ## Usage
 
 ```bash

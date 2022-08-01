@@ -1,6 +1,6 @@
-## Tests
+# Misc
 
-# Test tool
+## Test tool
 
 ```bash
 bash test/test.sh
@@ -11,7 +11,7 @@ bash test/test.sh
 * Test on a small input file
 * Check 3 sequences passes filters
 
-# Benchmarks
+## Benchmarks
 
 Compare with parallel implementation in pure-R
 

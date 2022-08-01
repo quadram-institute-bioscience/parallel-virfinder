@@ -9,7 +9,7 @@ import subprocess
 import logging
 import tempfile
 
-__VERSION__="0.1.0"
+__VERSION__="0.2.0"
 # parse csv
 import csv
 def parse_csv(filename):
@@ -110,6 +110,10 @@ if __name__ == "__main__":
 
     logging.info("Starting parallel-virfinder v{}".format(__VERSION__))
     
+    if args.parallel < 2:
+        logging.error("Number of parallel processes must be at least 2")
+        sys.exit(1)
+        
     if not has_r():
         logging.error("R is not installed")
         sys.exit(1)

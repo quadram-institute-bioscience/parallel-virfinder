@@ -13,6 +13,6 @@ bash test/test.sh
 
 ## Benchmarks
 
-Compare with parallel implementation in pure-R
+Compare with parallel implementation in pure-R. 
 
-* [Benchmark results](test/bench/README.md)
+See [benchmark](bench/README.md) directory.

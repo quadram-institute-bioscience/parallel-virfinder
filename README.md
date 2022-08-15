@@ -1,7 +1,9 @@
 # parallel-virfinder
 
+![License](https://img.shields.io/github/license/quadram-institute-bioscience/parallel-virfinder)
 [![Test-Package](https://github.com/quadram-institute-bioscience/parallel-virfinder/actions/workflows/test.yml/badge.svg)](https://github.com/quadram-institute-bioscience/parallel-virfinder/actions/workflows/test.yml)
 [![Bioconda downloads](https://img.shields.io/conda/dn/bioconda/parallel-virfinder)](https://bioconda.github.io/recipes/parallel-virfinder/README.html)
+![Bioconda platforms](https://img.shields.io/conda/pn/bioconda/parallel-virfinder)
 
 Run virfinder in parallel, saving both scores and FASTA file
 

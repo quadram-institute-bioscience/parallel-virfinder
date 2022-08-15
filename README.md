@@ -51,6 +51,10 @@ Miscallaneous arguments:
 
 ```
 
+### Benchmark
+
+If [compared with a parallel implementation in R](share/pvirfinder.R), this wrapper performs better (smaller times, smaller memroy usage). See **[benchmark](test/bench/README.md)**.
+
 ### Citations
 
 If you use parallel-virfinder, please cite the following paper:

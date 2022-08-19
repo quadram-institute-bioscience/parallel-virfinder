@@ -9,7 +9,7 @@ import subprocess
 import logging
 import tempfile
 
-__VERSION__="0.3.0"
+__VERSION__="0.3.1"
 # parse csv
 import csv
 def parse_csv(filename):
@@ -69,11 +69,13 @@ def split_fasta(inputfasta, outputdir, n):
     """
     outpattern = os.path.join(outputdir, "split_00000.fasta")
     cmd = ["fu-split", "-i", inputfasta, "-o", outpattern, "-n", str(n), "--threads", str(n)]
+    logging.debug("Running command: %s" % " ".join(cmd))
     job = subprocess.call(cmd)
     return job == 0
 
 def run_virfinder(fasta, output):
     cmdstring = "library('VirFinder'); Result <- VF.pred('{}'); write.csv(Result, file='{}', row.names=TRUE);".format(fasta, output)
+    logging.debug("Running command: Rscript --vanilla --no-save -e '{}'".format(cmdstring))
     cmd = ["Rscript", "--vanilla", "--no-save", "-e", cmdstring]
     # Execute job in background
     job = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     if args.debug:
         DELETE=False
         logLevel = logging.DEBUG
-    if args.verbose:
+    elif args.verbose:
         DELETE=True
         logLevel = logging.INFO
     else:
@@ -113,7 +115,12 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logLevel)
 
     logging.info("Starting parallel-virfinder v{}".format(__VERSION__))
-    
+
+     # Check input file
+    if not os.path.exists(args.input) or os.path.getsize(args.input) == 0:
+        logging.error("Input file does not exist or is empty: %s" % args.input)
+        sys.exit(1)
+
     if args.parallel < 2:
         logging.error("Number of parallel processes must be at least 2")
         sys.exit(1)
@@ -126,10 +133,11 @@ if __name__ == "__main__":
         logging.error("VirFinder is not installed")
         sys.exit(1)
 
-  
+
+
     # Split FASTA into chunks
     if split_fasta(args.input, args.tmpdir, args.parallel):
-        logging.info("FASTA split into %d chunks", args.parallel)
+        logging.info("FASTA split into %d chunks to %s", args.parallel, args.tmpdir)
     else:
         logging.error("Failed to split FASTA file")
         sys.exit(1)
@@ -140,9 +148,12 @@ if __name__ == "__main__":
         N = i + 1
         chunk = os.path.join(args.tmpdir, "split_%05d.fasta" % N)
         output = os.path.join(args.tmpdir, "split_%05d.csv" % N)
-        pid, file = run_virfinder(chunk, output)
-        jobOutput[pid] = file
-        logging.debug("Started virfinder on chunk %d with PID %d: %s", i, pid, output)
+        if os.path.exists(chunk) and not os.path.getsize(chunk) == 0:
+            pid, file = run_virfinder(chunk, output)
+            jobOutput[pid] = file
+            logging.debug("Started virfinder on chunk %d with PID %d: %s -> %s", i, pid, chunk, output)
+        else:
+            logging.info("Skipping chunk %d: %s", i, chunk)
     
     # Wait for all jobs to finish
     for pid, outfile in jobOutput.items():
@@ -160,6 +171,9 @@ if __name__ == "__main__":
         print('"","name","length","score","pvalue"', file=f)
         for _, outfile in jobOutput.items():
             lines = []
+            if not os.path.exists(outfile) or os.path.getsize(outfile) == 0:
+                logging.info("Skipping empty output file: %s", outfile)
+                continue
             for i in parse_csv(outfile):
                 parsed += 1
                 #"","name","length","score","pvalue"

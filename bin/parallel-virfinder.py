@@ -9,7 +9,7 @@ import subprocess
 import logging
 import tempfile
 
-__VERSION__="0.2.0"
+__VERSION__="0.3.0"
 # parse csv
 import csv
 def parse_csv(filename):
@@ -46,7 +46,10 @@ def has_r():
     try:
         subprocess.call(['Rscript', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        return False
+    except Exception as e:
+        print("Unexpected error when checking Rscript: %s" % e, file=sys.stderr)
         return False
 
 def has_virfinder():
@@ -92,6 +95,7 @@ if __name__ == "__main__":
     vf.add_argument("-p", "--max-p-value",   help="Maximum p-value [default: %(default)s]", default=0.05, type=float)
     # Miscallaneous arguments group
     misc_group = args.add_argument_group("Miscallaneous arguments")
+    misc_group.add_argument("--no-check",  help="Do not check dependencies at startup", action="store_true")
     misc_group.add_argument("-v", "--verbose",  help="Verbose output", action="store_true")
     misc_group.add_argument("-d", "--debug",    help="Debug output", action="store_true")
     args = args.parse_args()
@@ -114,11 +118,11 @@ if __name__ == "__main__":
         logging.error("Number of parallel processes must be at least 2")
         sys.exit(1)
         
-    if not has_r():
+    if not args.no_check and not has_r():
         logging.error("R is not installed")
         sys.exit(1)
     
-    if not has_virfinder():
+    if not args.no_check and not has_virfinder():
         logging.error("VirFinder is not installed")
         sys.exit(1)
 

@@ -102,9 +102,12 @@ if __name__ == "__main__":
 
     # Miscallaneous arguments group
     misc_group = args.add_argument_group("Running options")
+    misc_group.add_argument("--version", action="version", version="%(prog)s {}".format(__VERSION__))
     misc_group.add_argument("--no-check",  help="Do not check dependencies at startup", action="store_true")
     misc_group.add_argument("-v", "--verbose",  help="Verbose output", action="store_true")
     misc_group.add_argument("-d", "--debug",    help="Debug output and do not remove temporary files", action="store_true")
+
+    
     args = args.parse_args()
 
     if args.debug:

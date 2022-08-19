@@ -18,7 +18,7 @@ fi
 
 bin/parallel-virfinder.py -i test/phage-contigs.fna -o test/phages.csv --verbose -f test/phages.fa -p 0.1 -s 0.5 
 if [[ $? -eq 0 ]]; then
-  echo "OK: VirFinder executedd"
+  echo "OK: VirFinder executed"
 else
   echo "FAIL: Failed VirFinder"
   exit

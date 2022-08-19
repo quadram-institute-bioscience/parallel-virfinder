@@ -24,11 +24,11 @@ parallel-virfinder.py -i input.fasta -o output.csv -t THREADS [-f output.fasta]
 ## Options
 
 ```text
-usage: parallel-virfinder.py [-h] -i INPUT -o OUTPUT [-f FASTA] [-n PARALLEL] [-t TMPDIR] [-s MIN_SCORE] [-p MAX_P_VALUE] [-v] [-d]
+usage: parallel-virfinder.py [-h] -i INPUT -o OUTPUT [-f FASTA] [-n PARALLEL] [-t TMPDIR] [-s MIN_SCORE] [-p MAX_P_VALUE] [--no-check] [-v] [-d]
 
 Execute virfinder on a FASTA file in parallel
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Input FASTA file
@@ -41,23 +41,33 @@ optional arguments:
   -t TMPDIR, --tmpdir TMPDIR
                         Temporary directory [default: /tmp]
 
-VirFinder arguments:
+VirFinder options:
   -s MIN_SCORE, --min-score MIN_SCORE
                         Minimum score [default: 0.9]
   -p MAX_P_VALUE, --max-p-value MAX_P_VALUE
                         Maximum p-value [default: 0.05]
 
-Miscallaneous arguments:
+Running options:
+  --no-check            Do not check dependencies at startup
   -v, --verbose         Verbose output
-  -d, --debug           Debug output
+  -d, --debug           Debug output and do not remove temporary files
 
 ```
 
-### Benchmark
+## Test
+
+Clone this repository, activate the conda environment and run:
+
+```bash
+# Activate the appropriate conda environment, if needed
+bash test/test.sh
+```
+
+## Benchmark
 
 If [compared with a parallel implementation in R](share/pvirfinder.R), this wrapper performs better (smaller times, smaller memroy usage). See **[benchmark](test/bench/README.md)**.
 
-### Citations
+## Citations
 
 If you use parallel-virfinder, please cite the following paper:
 
@@ -65,8 +75,7 @@ If you use parallel-virfinder, please cite the following paper:
 
 * Telatin, A., Fariselli, P., & Birolo, G. (2021). Seqfu: a suite of utilities for the robust and reproducible manipulation of sequence files. [Bioengineering, 8(5), 59](https://doi.org/10.3390/bioengineering8050059).
 
-
-### License
+## License
 
 [VirFinder](https://github.com/jessieren/VirFinder) (see [license](https://github.com/jessieren/VirFinder/blob/master/licence.md))
 is free to use for academic or non commercial use only.

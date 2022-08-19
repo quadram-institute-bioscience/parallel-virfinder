@@ -10,6 +10,7 @@ import logging
 import tempfile
 
 __VERSION__="0.3.1"
+
 # parse csv
 import csv
 def parse_csv(filename):
@@ -75,7 +76,7 @@ def split_fasta(inputfasta, outputdir, n):
 
 def run_virfinder(fasta, output):
     cmdstring = "library('VirFinder'); Result <- VF.pred('{}'); write.csv(Result, file='{}', row.names=TRUE);".format(fasta, output)
-    logging.debug("Running command: Rscript --vanilla --no-save -e '{}'".format(cmdstring))
+    logging.debug("Running command: Rscript --vanilla --no-save -e \"\n\t{}\"".format(cmdstring.replace(";", ";\n\t")))
     cmd = ["Rscript", "--vanilla", "--no-save", "-e", cmdstring]
     # Execute job in background
     job = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -84,22 +85,26 @@ def run_virfinder(fasta, output):
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="Execute virfinder on a FASTA file in parallel")
+    
+    # input and output
     args.add_argument("-i", "--input",    help="Input FASTA file", required=True)
     args.add_argument("-o", "--output",   help="Output CSV file", required=True)
     args.add_argument("-f", "--fasta",   help="Save FASTA file", required=False)
     
+    # Processing parameters
     args.add_argument("-n", "--parallel", help="Number of parallel processes [default: %(default)s]", default=4, type=int)
     args.add_argument("-t", "--tmpdir",   help="Temporary directory [default: %(default)s]", default=tempfile.gettempdir())
 
-    # Virfinder specific
-    vf = args.add_argument_group("VirFinder arguments")
+    # Virfinder specific parameters
+    vf = args.add_argument_group("VirFinder options")
     vf.add_argument("-s", "--min-score", help="Minimum score [default: %(default)s]", default=0.9, type=float)
     vf.add_argument("-p", "--max-p-value",   help="Maximum p-value [default: %(default)s]", default=0.05, type=float)
+
     # Miscallaneous arguments group
-    misc_group = args.add_argument_group("Miscallaneous arguments")
+    misc_group = args.add_argument_group("Running options")
     misc_group.add_argument("--no-check",  help="Do not check dependencies at startup", action="store_true")
     misc_group.add_argument("-v", "--verbose",  help="Verbose output", action="store_true")
-    misc_group.add_argument("-d", "--debug",    help="Debug output", action="store_true")
+    misc_group.add_argument("-d", "--debug",    help="Debug output and do not remove temporary files", action="store_true")
     args = args.parse_args()
 
     if args.debug:
@@ -128,10 +133,11 @@ if __name__ == "__main__":
     if not args.no_check and not has_r():
         logging.error("R is not installed")
         sys.exit(1)
-    
-    if not args.no_check and not has_virfinder():
+    elif not args.no_check and not has_virfinder():
         logging.error("VirFinder is not installed")
         sys.exit(1)
+    elif not args.no_check:
+        logging.info("R and VirFinder were found")
 
 
 
@@ -158,7 +164,7 @@ if __name__ == "__main__":
     # Wait for all jobs to finish
     for pid, outfile in jobOutput.items():
         os.waitpid(pid, 0)
-        logging.info("Virfinder on chunk %d finished: %s", pid, outfile)
+        logging.info("Virfinder job #%d finished: %s", pid, outfile)
     
     # Concatenate all results
 
@@ -174,6 +180,7 @@ if __name__ == "__main__":
             if not os.path.exists(outfile) or os.path.getsize(outfile) == 0:
                 logging.info("Skipping empty output file: %s", outfile)
                 continue
+            logging.debug("Parsing partial output file: %s", outfile)
             for i in parse_csv(outfile):
                 parsed += 1
                 #"","name","length","score","pvalue"
@@ -182,9 +189,9 @@ if __name__ == "__main__":
                     lines.append(i)
                     sequences.append(i[1])
                     print('"{}","{}",{},{},{}'.format(passed, i[1], i[2], i[3], i[4]), file=f)
-        
+                
             if DELETE:
-                logging.info("Deleting temporary file: %s", outfile)
+                logging.debug("Deleting temporary file: %s", outfile)
                 os.remove(outfile)
 
         
@@ -201,6 +208,14 @@ if __name__ == "__main__":
         
         if check != passed:
             logging.error("Failed to save all sequences, printed %d while %d passed" % ( check, passed) )
-            
-    logging.info("Passed %d out of %d sequences" % ( passed, parsed))
+
+    # Finally, delete temporary FASTA files
+    if DELETE:
+        for i in range(args.parallel):
+            N = i + 1
+            chunk = os.path.join(args.tmpdir, "split_%05d.fasta" % N)         
+            logging.debug("Deleting temporary FASTA file: %s", chunk)
+            os.remove(chunk)
+
+    logging.info("Saved %d predictions (out of %d input sequences)" % ( passed, parsed))
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ensurepip import version
 import os
 import sys
 import argparse
@@ -15,7 +14,7 @@ __VERSION__="0.3.1"
 import csv
 def parse_csv(filename):
     """
-    Parse CSV file
+    Parse CSV file, row generator
     """
 
     with open(filename, "r") as f:
@@ -25,6 +24,9 @@ def parse_csv(filename):
                 yield row
 
 def read_fasta(path):
+    """
+    Parse FASTA File (TODO move to cdhit_reader?)
+    """
     if path.endswith('.gz'):
         import gzip
     name = None
@@ -64,9 +66,28 @@ def has_virfinder():
     except subprocess.CalledProcessError:
         return False
 
+
+def has_seqfu():
+    """
+    Check if virfinder is installed
+    """
+    try:
+        cmd = ["seqfu", "version"]
+        # Get command STDOUT
+        out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+        # Check if stdout contains "seqfu 1.14+"
+        ver = out.decode("utf-8").strip().split(".")
+        if len(ver) == 3 and int(ver[0]) >= 1 and int(ver[1]) >= 14:
+            return True
+        else:
+            print("seqfu version {} is not supported".format(out.decode("utf-8")), file=sys.stderr)
+            return False
+            
+    except subprocess.CalledProcessError:
+        return False
 def split_fasta(inputfasta, outputdir, n):
     """
-    Split fasta file into n files
+    Split fasta file into n files using SeqFu 1.14+
     """
     outpattern = os.path.join(outputdir, "split_00000.fasta")
     cmd = ["fu-split", "-i", inputfasta, "-o", outpattern, "-n", str(n), "--threads", str(n)]
@@ -138,6 +159,9 @@ if __name__ == "__main__":
         sys.exit(1)
     elif not args.no_check and not has_virfinder():
         logging.error("VirFinder is not installed")
+        sys.exit(1)
+    elif not args.no_check and not has_seqfu():
+        logging.error("SeqFu is not installed, please install seqfu 1.14+")
         sys.exit(1)
     elif not args.no_check:
         logging.info("R and VirFinder were found")
